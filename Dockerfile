@@ -10,6 +10,10 @@ ENV GDBSERVER_PORT 2159
 
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 
+RUN yum -y install curl
+
+RUN curl -k https://bootstrap.pypa.io/get-pip.py | python - --trusted-host pypi.python.org
+
 # Yum dependencies
 RUN yum install -y \
     which \
@@ -26,7 +30,7 @@ RUN yum install -y \
     ntp \
     gcc-c++ \
     cmake \
-    python-setuptools
+    python-pip
 
 # Debug infos for GDB
 RUN debuginfo-install -y \
@@ -39,7 +43,7 @@ RUN debuginfo-install -y \
     zlib
 
 # Install supervisor
-RUN easy_install supervisor
+RUN pip install --trusted-host pypi.python.org supervisor
 
 # DBAdmin account configuration
 RUN groupadd -r verticadba
@@ -55,6 +59,7 @@ USER root
 RUN mkdir ~/.ssh && cd ~/.ssh && ssh-keygen -t rsa -q -f id_rsa
 RUN cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 RUN /usr/bin/ssh-keygen -A
+
 
 # Vertica specific system requirements
 RUN echo "session    required    pam_limits.so" >> /etc/pam.d/su
